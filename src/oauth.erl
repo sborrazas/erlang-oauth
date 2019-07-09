@@ -1,7 +1,7 @@
 -module(oauth).
 
 -export([get/3, get/5, get/6,
-  post/3, post/5, post/6,
+  post/3, post/5, post/6, post/7,
   delete/3, delete/5, delete/6,
   put/6, put/7,
   uri/2, header/1, sign/6, params_decode/1, token/1, token_secret/1, verify/6]).
@@ -37,6 +37,11 @@ post(URL, ExtraParams, Consumer, Token, TokenSecret) ->
 post(URL, ExtraParams, Consumer, Token, TokenSecret, HttpcOptions) ->
   SignedParams = sign("POST", URL, ExtraParams, Consumer, Token, TokenSecret),
   http_request(post, {URL, [], "application/x-www-form-urlencoded", uri_params_encode(SignedParams)}, HttpcOptions).
+
+post(URL, ExtraParams, {ContentType, Body}, Consumer, Token, TokenSecret, HttpcOptions) ->
+  SignedParams = sign("POST", URL, ExtraParams, Consumer, Token, TokenSecret),
+  AuthorizationHeader = header(SignedParams),
+  http_request(post, {URL, [AuthorizationHeader], ContentType, Body}, HttpcOptions).
 
 delete(URL, ExtraParams, Consumer) ->
   delete(URL, ExtraParams, Consumer, "", "").
